@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{%if user.is_authenticated %}
+  <h1>Автор: {{ author.first_name }} {{ author.last_name }}</h1>
+    {% if author.date_of_birth %}
+        <p>Родился: {{ author.date_of_birth }}</p>
+    {% endif %}
+    {% if author.date_of_death %}
+        <p>Умер: {{ author.date_of_death }}</p>
+    {% endif %}
+    {%if author.biographi %}
+        <p>Биография:  {{ author.biographi }}</p>
+    {% endif %}
+{%else%}
+    <a href="{% url 'login'%}?next={{request.path}}">Войти</a>
+{%endif%}
+{% endblock %}

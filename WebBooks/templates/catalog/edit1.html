@@ -1,0 +1,26 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{%if user.is_authenticated %}
+<h3>Изменить данные об авторе</h3>
+<h4>{{author.first_name}} {{author.last_name}} - ({{author.date_of_birth}}-{{author.date_of_death}})<br>
+{{author.biographi}}</h4>
+
+<form method="POST">
+    {%csrf_token%}
+    <p><label>Изменить имя</label><br>
+    <input type="text" name="first_name" value="{{author.first_name}}"/></p>
+    <p><label>Изменить Фамилию</label><br>
+    <input type="text" name="last_name" value="{{author.last_name}}"/></p>
+    <p><label>Изменить дату рождения</label><br>
+    <input type="date" name="date_of_birth" value="{{author.date_of_birth}}"/></p>
+    <p><label>Изменить дату смерти</label><br>
+    <input type="date" name="date_of_death" value="{{author.date_of_death}}"/></p><br>
+    <p><label>Изменить биографию</label><br></p>
+    <textarea name="biographi" cols="200" rows="6">{{author.biographi}}</textarea><br><br>
+    <input type="submit" value="Сохранить">
+</form>
+{%else%}
+    <a href="{% url 'login'%}?next={{request.path}}">Войти</a>
+{%endif%}
+{%endblock%}
