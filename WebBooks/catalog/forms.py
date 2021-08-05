@@ -2,6 +2,8 @@ from django import forms
 from datetime import date
 from .models import Book
 from django.forms import ModelForm
+#from django.contrib.auth import password_validation
+#from django.core.exceptions import ValidationError
 
 class AuthorsForm(forms.Form):
     first_name = forms.CharField(label="Имя автора", max_length=100)
