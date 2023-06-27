@@ -7,24 +7,43 @@
   <p><strong>Аннотация:</strong> {{ book.summary }}</p>
   <p><strong>ISBN:</strong> {{ book.isbn }}</p>
   <p><strong>Язык:</strong> {{ book.language }}</p>
+  <p><strong>Цена:</strong> {{ book.price }}</p>
      {% for author in book.author.all %}
         <p><strong>Автор:</strong>
            <a href="{{ author.get_absolute_url }}">{{ author.first_name }}
                       {{author.last_name}}</a></p>
      {% endfor %}
 
+
+
+    {% if user.is_authenticated %}
+<form method="POST" action="{% url 'purchase' book.id %}">
+  {% csrf_token %}
+  <input type="submit" value="Купить">
+</form>
+    <a href="{% url 'download' book.id %}">Скачать книгу</a>
+  {% if user.purchase %}
+    <a href="{% url 'download' book.id %}">Скачать книгу</a>
+  {% endif %}
+{% endif %}
+
 <div style="margin-left:20px;margin-top:20px">
     <h4>Количество экземпляров книг в БД</h4>
     {% if book.bookinstance_set.all %}
     {% for copy in book.bookinstance_set.all %}
+    {% if copy.status.id != 4 %}
        <hr><p class="{% if copy.status == 1 %} text-success
                  {% elif copy.status == 2 %} text-danger
                  {% else %} text-warning
                  {% endif %}"> {{ copy.get_status_display }}</p>
        <p><strong>Издательство:</strong> {{copy.imprint}}</p>
-       <p class="text-muted"><strong>Инвентарный номер:</strong> {{copy.inv_num}}</p>
-       <p><strong>Статус экземпляра книги в БД:</strong> {{copy.status}}</p>
+       <p class="text-muted"><strong>Адрес:</strong> {{copy.adress}}</p>
+
+
+       <p><strong>Статус экземпляра книги в БД:</strong> {{copy.status}}</p><hr>
+    {% endif %}
     {% endfor %}
+
     {% else %}
         <p>Экземпляров книг нет</p>
     {% endif %}

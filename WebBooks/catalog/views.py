@@ -1,12 +1,12 @@
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
-from .models import Author, Book, BookInstance, Genre
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseBadRequest
+from .models import Author, Book, BookInstance, Genre, Purchase
+from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import AuthorsForm
+from .forms import AuthorsForm, BookModelInstance, UserRegistrationForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-
+from django.urls import reverse_lazy, reverse
 
 def index(request):
     num_books = Book.objects.all().count()
@@ -31,6 +31,24 @@ class BookListView(generic.ListView):
 class BookDetailView(generic.DetailView):
     model = Book
 
+@login_required
+def purchase(request, book_id):
+    book = Book.objects.get(id=book_id)
+    purchase = Purchase.objects.create(user=request.user, book=book)
+    purchase.save()
+    return HttpResponseRedirect(reverse('download', args=(book_id,)))
+
+@login_required
+def download(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    purchase = Purchase.objects.filter(user=request.user, book=book).first()
+    if not purchase:
+        return HttpResponseBadRequest("Вы еще не купили эту книгу.")
+    file_path = book.file.path
+    response = HttpResponse(open(file_path, 'rb').read())
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment; filename=' + book.file.name.split('/')[-1]
+    return response
 
 class AuthorListView(generic.ListView):
     model = Author
@@ -42,9 +60,8 @@ class AuthorDetailView(generic.DetailView):
     template_name = 'catalog/author_detail1.html'
 
 
-class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
-    model = BookInstance
-    template_name = 'catalog/bookinstance_list_borrowed_user.html'
+class LoanedBooksByUserListView(generic.ListView):
+    model = Book
     paginate_by = 10
 
     def get_queryset(self):
@@ -108,3 +125,35 @@ class BookUpdate(UpdateView):
 class BookDelete(DeleteView):
     model = Book
     success_url = reverse_lazy('books')
+
+
+
+def register(request):
+    if request.method == 'POST':
+        user_form = UserRegistrationForm(request.POST)
+        if user_form.is_valid():
+            # Create a new user object but avoid saving it yet
+            new_user = user_form.save(commit=False)
+            # Set the chosen password
+            new_user.set_password(user_form.cleaned_data['password'])
+            # Save the User object
+            new_user.save()
+            return render(request, 'registration/register_done.html', {'new_user': new_user})
+    else:
+        user_form = UserRegistrationForm()
+    return render(request, 'registration/register.html', {'user_form': user_form})
+
+class book_status(generic.ListView):
+    model = Book
+    template_name = 'catalog/book_status.html'
+    fields = '__all__'
+    success_url = reverse_lazy('books')
+    paginate_by = 2
+
+def edit_field(request, pk):
+    obj = get_object_or_404(BookInstance, pk=pk)
+    form = BookModelInstance(request.POST or None, instance=obj)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        # redirect to success page
+    return render(request, 'catalog/bookinstancechange.html', {'form': form})

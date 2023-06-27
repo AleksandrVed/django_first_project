@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
-from django.conf.urls import url
+from django.urls import re_path as url
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -17,4 +17,9 @@ urlpatterns = [
     url(r'^book/create/$', views.BookCreate.as_view(), name='book_create'),
     url(r'^book/update/(?P<pk>\d+)$', views.BookUpdate.as_view(), name='book_update'),
     url(r'^book/delete/(?P<pk>\d+)$', views.BookUpdate.as_view(), name='book_delete'),
+    url(r'^register/$', views.register, name='register'),
+    url(r'^status_books/$', views.book_status.as_view(), name='status_book'),
+    path('edit/<int:pk>/', views.edit_field, name='edit_field'),
+    path('<int:book_id>/purchase/', views.purchase, name='purchase'),
+    path('<int:book_id>/download/', views.download, name='download'),
     ]

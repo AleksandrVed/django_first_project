@@ -35,6 +35,8 @@ class Book(models.Model):
     author = models.ManyToManyField('Author', help_text="Выберите автора книги", verbose_name="Автор книги")
     summary = models.TextField(max_length=1000, help_text="Введите краткое описание книги", verbose_name="Краткое описание книги")
     isbn = models.CharField(max_length=13, help_text="Должно содержать 13 символов", verbose_name="ISBN книги")
+    file = models.FileField(upload_to='books/')
+    price = models.CharField(max_length=20, null=True,help_text="Введите цену", verbose_name="Цена")
     def display_author(self):
         return ', '.join([author.last_name for author in self.author.all()])
     display_author.short_description = 'Авторы'
@@ -49,6 +51,15 @@ class Status(models.Model):
     def __str__(self):
         return self.name
 
+class Adress(models.Model):
+    name=models.CharField(max_length=100, help_text="Введите адрес магазина", verbose_name="Адрес магазина")
+    def __str__(self):
+        return self.name
+
+class Purchase(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+
 class BookInstance(models.Model):
     book=models.ForeignKey('Book', on_delete=models.CASCADE, null=True, verbose_name="Книга")
     inv_num = models.CharField(max_length=20, null=True, help_text="Введите инвентарный номер экземпляра", verbose_name="Инвентарный номер")
@@ -56,6 +67,7 @@ class BookInstance(models.Model):
     status = models.ForeignKey('Status', on_delete=models.CASCADE,help_text="Введите статус экземпляра", verbose_name="Статус экземпляра")
     due_back = models.DateField(null=True, blank=True, help_text="Введите дату окончания статуса", verbose_name="Дата окончания статуса")
     borrower = models.ForeignKey(User, on_delete=models.SET_NULL,null=True, blank=True,verbose_name="Заказчик", help_text="Выберите заказчика книги")
+    adress = models.ForeignKey('Adress', on_delete=models.CASCADE, help_text="Адрес магазина", verbose_name="Адрес магазина")
     @property
     def is_overdue(self):
         if self.due_back and date.today() > self.due_back:

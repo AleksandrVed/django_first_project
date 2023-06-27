@@ -10,7 +10,9 @@
         <a href="{{ book.get_absolute_url }}">
                  {{ book.title }}</a>
                  ({{book.genre}})
-          <a href="/edit1/{{author.id}}">Изменить</a> | <a href="/delete/{{author.id}}">Удалить</a>
+          {%if user.is_staff %}
+          <a href="/book/update/{{book.id}}">Изменить</a> | <a href="/book/delete/{{book.id}}">Удалить</a>
+          {%endif %}
       </li>
       {% endfor %}
     </ul>

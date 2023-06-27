@@ -12,6 +12,9 @@
     {%if author.biographi %}
         <p>Биография:  {{ author.biographi }}</p>
     {% endif %}
+    {% for book in author.book_author %}
+        <a>{{book.title}}</a>
+    {% endfor %}
 {%else%}
     <a href="{% url 'login'%}?next={{request.path}}">Войти</a>
 {%endif%}
