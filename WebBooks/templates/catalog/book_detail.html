@@ -21,10 +21,7 @@
   {% csrf_token %}
   <input type="submit" value="Купить">
 </form>
-    <a href="{% url 'download' book.id %}">Скачать книгу</a>
-  {% if user.purchase %}
-    <a href="{% url 'download' book.id %}">Скачать книгу</a>
-  {% endif %}
+
 {% endif %}
 
 <div style="margin-left:20px;margin-top:20px">
